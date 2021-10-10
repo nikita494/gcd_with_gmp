@@ -1,9 +1,10 @@
+#include <Python.h>
 #include <stdio.h>
 #include <gmp.h>
-#define GMP_INT mpz_t
+#include "gcd.h"
 
-void gcd(const GMP_INT num1, const GMP_INT num2, GMP_INT res){
-  GMP_INT c, a, b;
+void gcd(const mpz_t num1, const mpz_t num2, mpz_t res){
+  mpz_t c, a, b;
   mpz_init_set(a, num1);
   mpz_init_set(b, num2);
   mpz_init(c);
@@ -23,18 +24,33 @@ void gcd(const GMP_INT num1, const GMP_INT num2, GMP_INT res){
   return;
 }
 
-int main(){
-  GMP_INT x, y, res;
-  char x_str[1000], y_str[1000], res_str[1000];
-  scanf("%s", x_str);
-  scanf("%s", y_str);
-  mpz_init_set_str(x, x_str, 10);
-  mpz_init_set_str(y, y_str, 10);
-  mpz_init(res);
-  gcd(x, y, res);
-  mpz_get_str(res_str, 10, res);
-  printf("%s\n", res_str);
-  mpz_clear(x);
-  mpz_clear(y);
-  mpz_clear(res);
+static PyMethodDef methods[] = {
+  {"gcd", gcd_python, METH_VARARGS, "computes gcd"},
+  {NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef module = {
+  PyModuleDef_HEAD_INIT, "GCD", "Fast gcd computation", -1, methods
+};
+
+static PyObject *
+gcd_python(PyObject *self, PyObject *args){
+  if (PyTuple_Size(args) != 2){
+    PyErr_SetString(self, "not enough args");
+  }
+  const char *num1, *num2;
+  char* res;
+  PyArg_ParseTuple(args, "bb", &num1, &num2);
+  mpz_t a, b, c;
+  mpz_init_set_str(a, num1, 10);
+  mpz_init_set_str(b, num2, 10);
+  mpz_init(c);
+  gcd(a, b, c);
+  res = (char*)malloc(mtz_sizeinbase(c, 10)*sizeof(char));
+  PyObject* result = PyLong_FromString(res, NULL, 10);
+  free(res);
+  mpz_clear(a);
+  mpz_clear(b);
+  mpz_clear(c);
+  return result;
 }

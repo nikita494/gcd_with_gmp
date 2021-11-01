@@ -1,6 +1,10 @@
 from distutils.core import setup, Extension
 
-module1 = Extension("gcd", sources=["gcd.c"])
+module1 = Extension("gcd",
+                    include_dirs=[input('Path where .h are located: ')],
+                    libraries=['libgmp'],
+                    library_dirs=[input('Path where gmp library is located: ')],
+                    sources=['gcd_python.c'])
 
 setup(
     name="gcd",

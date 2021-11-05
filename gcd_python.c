@@ -1,13 +1,16 @@
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include "gcd.h"
 
 static PyObject* gcd_python(PyObject *self, PyObject *args){
-  if (PyTuple_Size(args) != 2){
-    PyErr_SetString(self, "not enough args");
+  PyObject* py1;
+  PyObject* py2;
+  if ((PyTuple_Size(args) != 2) & !PyArg_ParseTuple(args, "OO", &py1, &py2)){
+    return NULL;
   }
-  const char *num1, *num2;
-  char* res;
-  PyArg_ParseTuple(args, "BB", &num1, &num2);
+  const char *num1, *num2, *res;
+  num1 = PyUnicode_AsUTF8(PyUnicode_FromFormat("%A", py1));
+  num2 = PyUnicode_AsUTF8(PyUnicode_FromFormat("%A", py2));
   mpz_t a, b, c;
   mpz_init_set_str(a, num1, 10);
   mpz_init_set_str(b, num2, 10);
@@ -15,9 +18,6 @@ static PyObject* gcd_python(PyObject *self, PyObject *args){
   gcd(a, b, c);
   res = mpz_get_str(NULL, 10, c);
   PyObject* result = PyLong_FromString(res, NULL, 10);
-  free(res);
-  free(num1);
-  free(num2);
   mpz_clear(a);
   mpz_clear(b);
   mpz_clear(c);

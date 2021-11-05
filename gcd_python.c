@@ -6,6 +6,11 @@ static PyObject* gcd_python(PyObject *self, PyObject *args){
   PyObject* py1;
   PyObject* py2;
   if ((PyTuple_Size(args) != 2) & !PyArg_ParseTuple(args, "OO", &py1, &py2)){
+    PyErr_SetString(PyExc_TypeError, "Not enough args!");
+    return NULL;
+  }
+  else if (!PyLong_Check(py1) | !PyLong_Check(py2)){
+    PyErr_SetString(PyExc_TypeError, "None integer args!");
     return NULL;
   }
   const char *num1, *num2, *res;
@@ -24,8 +29,6 @@ static PyObject* gcd_python(PyObject *self, PyObject *args){
   return result;
 }
 
-static PyObject *GCDError;
-
 static PyMethodDef methods[] = {
   {"gcd", gcd_python, METH_VARARGS, "computes gcd"},
   {NULL, NULL, 0, NULL}
@@ -41,13 +44,5 @@ PyMODINIT_FUNC PyInit_gcd(void)
   m = PyModule_Create(&module);
   if (m == NULL)
     return NULL;
-  GCDError = PyErr_NewException("gcd.error", NULL, NULL);
-  Py_XINCREF(GCDError);
-  if (PyModule_AddObject(m, "error", GCDError) < 0) {
-      Py_XDECREF(GCDError);
-      Py_CLEAR(GCDError);
-      Py_DECREF(m);
-      return NULL;
-  }
   return m;
 }

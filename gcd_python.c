@@ -20,7 +20,7 @@ static PyObject* gcd_python(PyObject *self, PyObject *args){
   mpz_init_set_str(a, num1, 10);
   mpz_init_set_str(b, num2, 10);
   mpz_init(c);
-  gcd(a, b, c);
+  mpz_gcd(c, a, b);
   res = mpz_get_str(NULL, 10, c);
   PyObject* result = PyLong_FromString(res, NULL, 10);
   mpz_clear(a);
